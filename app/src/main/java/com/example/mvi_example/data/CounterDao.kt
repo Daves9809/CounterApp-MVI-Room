@@ -12,11 +12,19 @@ interface CounterDao {
 
     //get
     @Query("SELECT * FROM counter_table WHERE id = 0")
-    suspend fun getCounter(): Counter?
+    fun getCounter(): Flow<Counter>
 
     //increase, update
-    @Update
+    @Update()
     suspend fun increaseOrDecrease(counter: Counter)
+
+    //increase, update
+    @Query("UPDATE counter_table SET count = count + 1 WHERE id = 0 ")
+    suspend fun increaseCounter()
+
+    //increase, update
+    @Query("UPDATE counter_table SET count = count - 1 WHERE id = 0 ")
+    suspend fun decreaseCounter()
 
     //reset
     @Insert(onConflict = OnConflictStrategy.REPLACE)
