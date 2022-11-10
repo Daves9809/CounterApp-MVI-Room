@@ -1,13 +1,13 @@
 package com.example.mvi_example.di
 
 import android.app.Application
+import android.content.ContentValues
+import androidx.room.OnConflictStrategy
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.mvi_example.data.CounterDao
 import com.example.mvi_example.data.CounterDatabase
-import com.example.mvi_example.data.repository.CounterRepository
-import com.example.mvi_example.domain.IncreaseDecreaseCounterUseCase
-import com.example.mvi_example.domain.ObserveCounterUseCase
-import com.example.mvi_example.domain.ResetCounterUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,6 +22,16 @@ object AppModule {
     fun provideCounterDatabase(app: Application): CounterDatabase {
         return Room
             .databaseBuilder(app, CounterDatabase::class.java, "counter_db")
+            // insert init value
+            .addCallback(object : RoomDatabase.Callback() {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    super.onCreate(db)
+                    val contentValues = ContentValues()
+                    contentValues.put("id", 0)
+                    contentValues.put("count", 0)
+                    db.insert("counter_table", OnConflictStrategy.IGNORE, contentValues)
+                }
+            })
             .build()
     }
 
@@ -31,23 +41,4 @@ object AppModule {
         return counterDatabase.getCounterDao()
     }
 
-    @Singleton
-    @Provides
-    fun provideCounterRepository(counterDao: CounterDao): CounterRepository =
-        CounterRepository(counterDao)
-
-    @Singleton
-    @Provides
-    fun provideObserveCounterUseCase(counterRepository: CounterRepository): ObserveCounterUseCase =
-        ObserveCounterUseCase(counterRepository)
-
-    @Singleton
-    @Provides
-    fun provideIncreaseDecreaseCounterUseCase(counterRepository: CounterRepository): IncreaseDecreaseCounterUseCase =
-        IncreaseDecreaseCounterUseCase(counterRepository)
-
-    @Singleton
-    @Provides
-    fun provideResetCounterUseCase(counterRepository: CounterRepository): ResetCounterUseCase =
-        ResetCounterUseCase(counterRepository)
 }

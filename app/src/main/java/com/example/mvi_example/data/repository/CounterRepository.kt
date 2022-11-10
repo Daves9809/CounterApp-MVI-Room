@@ -3,26 +3,26 @@ package com.example.mvi_example.data.repository
 import android.util.Log
 import com.example.mvi_example.data.Counter
 import com.example.mvi_example.data.CounterDao
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class CounterRepository(
+@Singleton
+class CounterRepository @Inject constructor(
     private val counterDao: CounterDao
 ) {
 
-    suspend fun initializeCounter() {
-        Log.d("TAG","Initialized")
-        counterDao.initialize()
+    fun getCounterValue(): Flow<Counter> = counterDao.getCounter(COUNTER_ID)
+
+    suspend fun resetValueCount() = counterDao.reset(Counter(COUNTER_ID, 0))
+
+    suspend fun isEmpty(): Boolean = counterDao.isEmpty()
+
+    suspend fun increaseCounter() = counterDao.increaseCounter(COUNTER_ID)
+
+    suspend fun decreaseCounter() = counterDao.decreaseCounter(COUNTER_ID)
+
+    companion object {
+        private const val COUNTER_ID = 0
     }
-
-    fun getCounterValue(): Flow<Counter> = counterDao.getCounter().flowOn(Dispatchers.IO)
-
-    suspend fun resetValueCount() = counterDao.reset()
-
-    suspend fun isEmpty():Boolean = counterDao.isEmpty()
-
-    suspend fun increaseCounter() = counterDao.increaseCounter()
-
-    suspend fun decreaseCounter() = counterDao.decreaseCounter()
 }

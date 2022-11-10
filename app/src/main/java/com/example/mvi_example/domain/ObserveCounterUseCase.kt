@@ -1,16 +1,16 @@
 package com.example.mvi_example.domain
 
-import com.example.mvi_example.data.Counter
 import com.example.mvi_example.data.repository.CounterRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class ObserveCounterUseCase(
+// UseCase shouldn't be a Singleton
+class ObserveCounterUseCase @Inject constructor(
     private val counterRepository: CounterRepository,
-) : FlowUseCase<Counter>() {
-    override suspend fun performAction(): Flow<Counter> {
-        if (counterRepository.isEmpty())
-            counterRepository.initializeCounter()
+) : () -> Flow<Int> {
 
-        return counterRepository.getCounterValue()
+    override fun invoke(): Flow<Int> {
+        return counterRepository.getCounterValue().map { it.count }
     }
 }
